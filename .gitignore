@@ -9,3 +9,4 @@ chroma/
 node_modules/
 ui/dist/
 .weave_session.json
+.venv/

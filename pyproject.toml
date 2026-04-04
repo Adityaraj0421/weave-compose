@@ -1,4 +1,41 @@
-# pyproject.toml — stub only. Full content added in Chunk 0.1.2.
 [project]
 name = "weave-compose"
-version = "0.0.1"
+version = "0.1.0"
+description = "Platform-aware skill composition layer for AI coding tools"
+requires-python = ">=3.11"
+dependencies = [
+    "typer",
+    "sentence-transformers",
+    "numpy",
+    "pyyaml",
+]
+
+[project.scripts]
+weave = "weave.cli.main:app"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+    "mypy",
+]
+
+[tool.setuptools.packages.find]
+include = ["weave*"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+line-length = 88
+
+[tool.mypy]
+strict = true
+
+[[tool.mypy.overrides]]
+module = "sentence_transformers"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
