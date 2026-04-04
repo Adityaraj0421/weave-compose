@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.env
+dist/
+*.egg-info/
+.mypy_cache/
+.ruff_cache/
+chroma/
+node_modules/
+ui/dist/
+.weave_session.json
