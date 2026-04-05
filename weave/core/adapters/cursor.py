@@ -7,6 +7,7 @@ from typing import Any
 import yaml
 
 from weave.core.adapters.base import BaseAdapter
+from weave.core.adapters.manifest import apply_manifest
 from weave.core.schema import Skill
 
 logger = logging.getLogger(__name__)
@@ -118,7 +119,7 @@ class CursorAdapter(BaseAdapter):
         paragraphs = content.strip().split("\n\n")
         trigger_context = paragraphs[0].strip() if paragraphs else ""
 
-        return Skill(
+        skill = Skill(
             id=self._generate_id(),
             name=name,
             platform="cursor",
@@ -130,6 +131,7 @@ class CursorAdapter(BaseAdapter):
             metadata={"format": "cursorrules"},
             loaded_at=self._timestamp(),
         )
+        return apply_manifest(skill, path)
 
     def _load_mdc_file(self, path: Path) -> Skill | None:
         """Parse a single ``*.mdc`` file and return a Skill, or None on failure.
@@ -172,7 +174,7 @@ class CursorAdapter(BaseAdapter):
         if globs:
             metadata["globs"] = globs
 
-        return Skill(
+        skill = Skill(
             id=self._generate_id(),
             name=name,
             platform="cursor",
@@ -184,3 +186,4 @@ class CursorAdapter(BaseAdapter):
             metadata=metadata,
             loaded_at=self._timestamp(),
         )
+        return apply_manifest(skill, path)

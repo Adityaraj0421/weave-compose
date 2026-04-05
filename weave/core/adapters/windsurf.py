@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from weave.core.adapters.base import BaseAdapter
+from weave.core.adapters.manifest import apply_manifest
 from weave.core.schema import Skill
 
 logger = logging.getLogger(__name__)
@@ -94,7 +95,7 @@ class WindsurfAdapter(BaseAdapter):
 
         metadata: dict[str, Any] = {"format": "windsurfrules"}
 
-        return Skill(
+        skill = Skill(
             id=self._generate_id(),
             name=name,
             platform="windsurf",
@@ -106,3 +107,4 @@ class WindsurfAdapter(BaseAdapter):
             metadata=metadata,
             loaded_at=self._timestamp(),
         )
+        return apply_manifest(skill, path)

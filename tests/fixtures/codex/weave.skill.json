@@ -1,0 +1,14 @@
+{
+  "weave_protocol": "1.0",
+  "name": "Security Code Reviewer",
+  "version": "1.1.0",
+  "platform": "codex",
+  "capabilities": ["security", "code-review", "vulnerabilities", "owasp"],
+  "trigger_patterns": [
+    "review code for security issues",
+    "check for vulnerabilities",
+    "audit code for OWASP compliance"
+  ],
+  "author": "Weave Contributors",
+  "dependencies": []
+}

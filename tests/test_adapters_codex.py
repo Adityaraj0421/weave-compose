@@ -61,3 +61,19 @@ def test_codex_detect_returns_true_for_directory_with_agents_md(
 ) -> None:
     """detect() returns True for the codex fixtures directory."""
     assert codex_adapter.detect(str(CODEX_FIXTURES)) is True
+
+
+# ---------------------------------------------------------------------------
+# Manifest (weave.skill.json) tests — CodexAdapter
+# ---------------------------------------------------------------------------
+
+def test_codex_adapter_applies_manifest(
+    codex_adapter: CodexAdapter,
+) -> None:
+    """load() applies weave.skill.json manifest to codex skills."""
+    skills = codex_adapter.load(str(CODEX_FIXTURES))
+    manifest_skill = next(
+        (s for s in skills if s.metadata.get("version") == "1.1.0"), None
+    )
+    assert manifest_skill is not None
+    assert manifest_skill.name == "Security Code Reviewer"
