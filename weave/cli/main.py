@@ -118,3 +118,34 @@ def query(
     for i, (skill, score) in enumerate(results, start=1):
         typer.echo(f"\n[{i}] {skill.name} ({skill.platform}) — score: {score:.4f}")
         typer.echo(f"    {skill.trigger_context}")
+
+
+@app.command(name="list")
+def list_skills(
+    platform: str | None = typer.Option(
+        None,
+        "--platform",
+        "-p",
+        help="Filter by platform: claude_code, cursor, codex, windsurf",
+    ),
+) -> None:
+    """List all skills loaded in the current session."""
+    registry = SkillRegistry()
+    registry.load_session(SESSION_FILE)
+
+    skills = (
+        registry.get_by_platform(platform) if platform is not None else registry.get_all()
+    )
+
+    if not skills:
+        suffix = f" for platform {platform!r}" if platform else ""
+        typer.echo(f"No skills loaded{suffix}. Run `weave load <path>` first.")
+        return
+
+    for skill in skills:
+        caps = ", ".join(skill.capabilities[:3])
+        if len(skill.capabilities) > 3:
+            caps += "..."
+        typer.echo(f"  {skill.name:<30} {skill.platform:<15} [{caps}]")
+
+    typer.echo(f"\nTotal: {len(skills)} skill(s)")
