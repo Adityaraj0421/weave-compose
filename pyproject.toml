@@ -1,13 +1,13 @@
 [project]
 name = "weave-compose"
-version = "1.0.0"
+version = "1.0.1"
 description = "Platform-aware skill composition layer for AI coding tools"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
-keywords = ["ai", "skills", "composition", "claude", "cursor", "codex", "windsurf"]
+keywords = ["ai", "llm", "mcp", "skills", "composition", "claude", "cursor", "codex", "windsurf", "developer-tools", "skill-composition"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",

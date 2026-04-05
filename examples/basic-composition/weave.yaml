@@ -1,0 +1,15 @@
+version: "1"
+
+skills:
+  - path: ./skills
+    platform: claude_code
+
+composition:
+  strategy: dynamic
+  max_active_skills: 2
+  confidence_threshold: 0.1
+  model: all-MiniLM-L6-v2
+
+output:
+  verbose: false
+  explain: false
