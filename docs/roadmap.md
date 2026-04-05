@@ -4,7 +4,7 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 
 ---
 
-## v0.1 — Phase 1: Core Engine `[IN PROGRESS]`
+## v0.1 — Phase 1: Core Engine `[SHIPPED — 2026-04-05]`
 
 **Goal:** Skills can be loaded, normalized, embedded, and queried from the CLI.
 
@@ -18,7 +18,7 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 
 ---
 
-## v0.2 — Phase 2: Composition Engine `[PLANNED]`
+## v0.2 — Phase 2: Composition Engine `[SHIPPED — 2026-04-05]`
 
 **Goal:** Weave composes multiple skills together and injects a merged context.
 
@@ -30,7 +30,7 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 
 ---
 
-## v0.3 — Phase 3: Multi-Platform Adapters `[PLANNED]`
+## v0.3 — Phase 3: Multi-Platform Adapters `[SHIPPED — 2026-04-05]`
 
 **Goal:** Weave works with Cursor, Codex, and Windsurf out of the box.
 
@@ -43,7 +43,7 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 
 ---
 
-## v0.4 — Phase 4: Persistence + UI `[PLANNED]`
+## v0.4 — Phase 4: Persistence + UI `[SHIPPED — 2026-04-05]`
 
 **Goal:** Skills persist between sessions. Visual composer for non-technical users.
 
@@ -55,7 +55,7 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 
 ---
 
-## v1.0 — Phase 5: Agent-to-Agent Protocol `[PLANNED]`
+## v1.0 — Phase 5: Agent-to-Agent Protocol `[SHIPPED — 2026-04-05]`
 
 **Goal:** Skills can discover and call each other without human involvement.
 
@@ -64,6 +64,27 @@ Weave ships in five phases. Each phase ends with a release tag on `main`. This f
 - `weave.skill.json` manifest — per-skill capabilities, trigger patterns, dependencies
 - Dependency resolution — load skill A and its declared dependencies automatically
 - Conflict detection — identifies and resolves contradicting instructions between skills
+
+---
+
+## What's Next — Post-v1.0 Community Priorities
+
+Weave v1.0 is complete. The following are the highest-priority areas for
+community contributions and future development:
+
+- **Gemini CLI adapter** — the only major platform without an adapter;
+  see [docs/adapters.md](adapters.md) to get started
+- **Skill marketplace / registry** — a public index of community-published
+  skills, discoverable by name and capability
+- **VS Code extension** — surface Weave's skill selection and composition
+  directly inside the editor sidebar
+- **Cloud skill sync (opt-in)** — sync loaded skills across machines via a
+  user-controlled remote store (no telemetry, fully opt-in)
+- **Benchmarks and performance docs** — measure and document selector
+  latency, embedding throughput, and composition quality across skill sets
+
+If you want to work on any of these, open an issue on GitHub to coordinate
+before starting. See [CONTRIBUTING.md](../CONTRIBUTING.md) for the process.
 
 ---
 
