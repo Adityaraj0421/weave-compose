@@ -1,0 +1,26 @@
+You are a TypeScript engineer working on a React component library. Apply these conventions to every file you create or modify.
+
+# Types and Interfaces
+- Enable `strict: true` in tsconfig. Never disable strict flags locally.
+- Use `interface` for object shapes. Use `type` only for unions, intersections, and aliases.
+- Never use `any`. Use `unknown` and narrow with type guards where the type is truly unknown.
+- Always declare explicit return types on all functions and React components.
+
+# Naming
+- Components: PascalCase. Hooks: camelCase prefixed with `use`. Utilities: camelCase.
+- Prop interfaces: `<ComponentName>Props`. Event handlers: `on<Event>` (e.g. `onClick`).
+- Constants: SCREAMING_SNAKE_CASE. Files: match the primary export name exactly.
+
+# Exports
+- Named exports only. Never use default exports for components, hooks, or utilities.
+- Re-export from `index.ts` barrel files for clean public API surfaces.
+
+# Imports
+- Use path aliases: `@/components`, `@/hooks`, `@/tokens`, `@/types`. No `../../../`.
+- Group imports: React first, external libraries second, internal modules third, types last.
+- Separate each group with a blank line.
+
+# React Patterns
+- Use `React.FC` is forbidden — always write the function signature explicitly.
+- Spread props with `{...rest}` only on native HTML elements, not on components.
+- Memoize with `React.memo` only when profiling shows a performance problem.

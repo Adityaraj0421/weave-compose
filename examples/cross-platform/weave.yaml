@@ -1,0 +1,18 @@
+version: "1"
+
+skills:
+  - path: ./claude-skills
+    platform: claude_code
+
+  - path: ./cursor-rules
+    platform: cursor
+
+composition:
+  strategy: dynamic
+  max_active_skills: 2
+  confidence_threshold: 0.1
+  model: all-MiniLM-L6-v2
+
+output:
+  verbose: false
+  explain: false
