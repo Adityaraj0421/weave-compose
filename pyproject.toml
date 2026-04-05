@@ -38,9 +38,14 @@ dev = [
     "ruff",
     "mypy",
     "types-PyYAML",
+    "httpx",
 ]
 persist = [
     "chromadb",
+]
+server = [
+    "fastapi",
+    "uvicorn",
 ]
 
 [tool.setuptools.packages.find]
