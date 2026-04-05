@@ -20,6 +20,7 @@ dependencies = [
     "sentence-transformers",
     "numpy",
     "pyyaml",
+    "mcp>=1.0.0",
 ]
 
 [project.urls]
@@ -86,6 +87,14 @@ ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
 module = "pydantic"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mcp"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "mcp.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
