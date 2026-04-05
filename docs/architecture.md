@@ -115,3 +115,11 @@ Tracing a single `weave query "design a button component"` call:
 ```
 
 **Key performance property:** embedding runs once at `weave load` time. `weave query` only embeds the short query string — not the skills. This makes repeated queries fast even with large skill registries.
+
+---
+
+## Inter-Skill Protocol
+
+Phase 5 introduces an inter-skill protocol that allows skills to discover and call each other without human involvement. Skills advertise capabilities via a `weave.skill.json` sidecar manifest and can declare dependencies on other skills. The Weave runtime resolves dependencies at load time and injects dependency contexts at a lower weight alongside the primary skill.
+
+See [docs/protocol.md](protocol.md) for the full protocol specification, JSON schema, and request/response format.

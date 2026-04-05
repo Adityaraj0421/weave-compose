@@ -118,6 +118,7 @@ Contributions are welcome at every layer — new platform adapters, composition 
 - **Contributor guide:** [docs/contributing.md](docs/contributing.md)
 - **Writing a new adapter:** [docs/adapters.md](docs/adapters.md)
 - **Architecture overview:** [docs/architecture.md](docs/architecture.md)
+- **Inter-skill protocol spec:** [docs/protocol.md](docs/protocol.md)
 
 All code must pass `pytest`, `ruff check .`, and `mypy --strict .` before merging.
 
