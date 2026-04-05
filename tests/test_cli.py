@@ -59,6 +59,21 @@ def test_query_returns_result_after_loading(
     assert "Naksha" in result.output
 
 
+def test_query_with_output_composed_prints_composed_context(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """weave query --output composed prints merged composed context after loading."""
+    monkeypatch.chdir(tmp_path)
+    load_result = runner.invoke(app, ["load", str(CLAUDE_FIXTURES)])
+    assert load_result.exit_code == 0
+
+    result = runner.invoke(
+        app, ["query", "design a UI component with Tailwind", "--output", "composed"]
+    )
+    assert result.exit_code == 0
+    assert "Composed context" in result.output
+
+
 def test_clear_deletes_session_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
