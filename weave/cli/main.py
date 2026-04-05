@@ -1,6 +1,8 @@
 """Typer CLI entry point for the Weave composition engine."""
 
+import json
 import logging
+from pathlib import Path
 
 import typer
 
@@ -149,3 +151,35 @@ def list_skills(
         typer.echo(f"  {skill.name:<30} {skill.platform:<15} [{caps}]")
 
     typer.echo(f"\nTotal: {len(skills)} skill(s)")
+
+
+@app.command()
+def status() -> None:
+    """Show registry status: skill count, platform breakdown, and session info."""
+    registry = SkillRegistry()
+    registry.load_session(SESSION_FILE)
+
+    total = registry.count()
+    typer.echo(f"Skills loaded:   {total}")
+
+    if total > 0:
+        platforms: dict[str, int] = {}
+        for skill in registry.get_all():
+            platforms[skill.platform] = platforms.get(skill.platform, 0) + 1
+        for plat, count in sorted(platforms.items()):
+            typer.echo(f"  {plat}: {count}")
+
+    typer.echo("Embedding model: all-MiniLM-L6-v2")
+
+    session_path = Path(SESSION_FILE)
+    if session_path.exists():
+        try:
+            with open(session_path, encoding="utf-8") as fh:
+                data: dict[str, object] = json.load(fh)
+            saved_at = str(data.get("saved_at", "unknown"))
+        except (json.JSONDecodeError, KeyError):
+            saved_at = "unknown"
+        typer.echo(f"Session file:    {SESSION_FILE}")
+        typer.echo(f"Last saved:      {saved_at}")
+    else:
+        typer.echo("Session file:    not found")
