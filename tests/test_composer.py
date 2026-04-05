@@ -95,3 +95,75 @@ def test_compose_empty_skills_returns_empty_string(
     """compose() and compose_minimal() both return '' for empty input."""
     assert composer.compose([]) == ""
     assert composer.compose_minimal([]) == ""
+
+
+# ---------------------------------------------------------------------------
+# Conflict detection tests
+# ---------------------------------------------------------------------------
+
+def test_detect_conflicts_returns_empty_for_non_conflicting_skills(
+    composer: WeaveComposer,
+    skill_a: Skill,
+    skill_b: Skill,
+) -> None:
+    """detect_conflicts() returns [] when skills have no opposing keywords."""
+    # skill_a and skill_b fixtures have different domains, no opposing keywords
+    skill_a_emb = Skill(
+        id=skill_a.id, name=skill_a.name, platform=skill_a.platform,
+        source_path=skill_a.source_path, capabilities=skill_a.capabilities,
+        trigger_context=skill_a.trigger_context, raw_content=skill_a.raw_content,
+        embedding=[0.1, 0.2, 0.3], metadata=skill_a.metadata, loaded_at=skill_a.loaded_at,
+    )
+    skill_b_emb = Skill(
+        id=skill_b.id, name=skill_b.name, platform=skill_b.platform,
+        source_path=skill_b.source_path, capabilities=skill_b.capabilities,
+        trigger_context=skill_b.trigger_context, raw_content=skill_b.raw_content,
+        embedding=[0.9, 0.8, 0.7], metadata=skill_b.metadata, loaded_at=skill_b.loaded_at,
+    )
+    result = composer.detect_conflicts([(skill_a_emb, 0.9), (skill_b_emb, 0.5)])
+    assert result == []
+
+
+def test_detect_conflicts_returns_empty_when_embeddings_absent(
+    composer: WeaveComposer,
+) -> None:
+    """detect_conflicts() returns [] when embeddings are empty (cannot compare)."""
+    skill_tabs = Skill(
+        id="conf-001", name="Tabs Skill", platform="claude_code",
+        source_path="/tmp/tabs.md", capabilities=["style"],
+        trigger_context="formatting", raw_content="always use tabs for indentation",
+        embedding=[], metadata={}, loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    skill_spaces = Skill(
+        id="conf-002", name="Spaces Skill", platform="claude_code",
+        source_path="/tmp/spaces.md", capabilities=["style"],
+        trigger_context="formatting", raw_content="never use tabs, always use spaces",
+        embedding=[], metadata={}, loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    result = composer.detect_conflicts([(skill_tabs, 0.9), (skill_spaces, 0.8)])
+    assert result == []
+
+
+def test_detect_conflicts_detects_opposing_keyword_conflict(
+    composer: WeaveComposer,
+) -> None:
+    """detect_conflicts() returns a pair when sim >= threshold and keywords oppose."""
+    shared_vec = [1.0, 0.0, 0.0]  # identical embedding → sim == 1.0
+    skill_tabs = Skill(
+        id="conf-003", name="Tabs Skill", platform="claude_code",
+        source_path="/tmp/tabs.md", capabilities=["style"],
+        trigger_context="code formatting style",
+        raw_content="always use tabs for indentation in all files",
+        embedding=shared_vec, metadata={}, loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    skill_spaces = Skill(
+        id="conf-004", name="Spaces Skill", platform="claude_code",
+        source_path="/tmp/spaces.md", capabilities=["style"],
+        trigger_context="code formatting style",
+        raw_content="never use tabs, avoid tabs completely, use spaces only",
+        embedding=shared_vec, metadata={}, loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    result = composer.detect_conflicts([(skill_tabs, 0.9), (skill_spaces, 0.8)])
+    assert len(result) == 1
+    assert result[0][0].name == "Tabs Skill"
+    assert result[0][1].name == "Spaces Skill"
