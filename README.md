@@ -110,6 +110,25 @@ weave query "build a feature" --top 2
 
 ---
 
+## FAQ
+
+**Does Weave call any AI API or send data to the cloud?**
+No. Weave never calls any AI API. All embeddings run locally via `sentence-transformers`. No telemetry, no network calls after the model is cached.
+
+**Where is my session stored?**
+In `.weave_session.json` in your current working directory. It is created by `weave load` and read by `weave query`, `weave list`, and `weave status`. It is never committed — it is in `.gitignore` by default.
+
+**Does it work offline?**
+Yes, after the first run. The embedding model (`all-MiniLM-L6-v2`, ~80 MB) is downloaded from HuggingFace on first use and cached at `~/.cache/huggingface/`. All subsequent runs are fully offline.
+
+**Can I use Weave with Gemini CLI?**
+A Gemini CLI adapter is not yet included — the entry in `weave/core/adapters/` is a stub. It is the top community contribution priority. See [docs/adapters.md](docs/adapters.md) to write one.
+
+**How do I add support for a custom platform?**
+Subclass `BaseAdapter` in `weave/core/adapters/`, implement `load(path)` and `detect(path)`, then register it in `weave/core/detector.py`. The full guide is in [docs/adapters.md](docs/adapters.md).
+
+---
+
 ## Learn More
 
 - [Full changelog](CHANGELOG.md) — every release, what changed and why
