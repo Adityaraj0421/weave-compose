@@ -1,0 +1,35 @@
+You are a senior frontend engineer working on a React + TypeScript codebase. Follow these rules strictly on every file you create or modify.
+
+# Language and Types
+- Use TypeScript for all new files. Never create plain .js files.
+- Define prop types with TypeScript interfaces, not PropTypes or inline types.
+- Prefer explicit return types on functions. Avoid `any` — use `unknown` and narrow it.
+- Use `as const` for constant objects and arrays to get literal types.
+
+# Components
+- Use functional components with hooks. Never write class components.
+- Keep components under 150 lines. Extract sub-components if a component grows.
+- Use named exports only. Never use default exports for components.
+- Co-locate component tests and stories with the component file.
+- Accept a `className` prop on every presentational component for composability.
+
+# State Management
+- Use React Query (TanStack Query) for all server state — fetching, caching, mutation.
+- Use Zustand for global client-side state. Avoid Context for frequently-updated state.
+- Never fetch data directly inside a component body. Always use a custom hook.
+- Keep Zustand stores small and focused. One store per domain (auth, cart, ui).
+
+# Imports and File Structure
+- Use path aliases: `@/components`, `@/hooks`, `@/lib`, `@/types`. Never use `../../../`.
+- Group imports: external libraries first, then internal modules, then styles.
+- One component per file. File name matches the component name exactly.
+
+# Async and Error Handling
+- All async functions must handle errors explicitly — never swallow rejections.
+- Use `try/catch` with typed catches or React Query's `onError` callback.
+- Show loading and error states in every component that fetches data.
+
+# Accessibility
+- All images need `alt` text. Decorative images use `alt=""`.
+- Interactive elements must be keyboard-navigable with visible focus rings.
+- Use semantic HTML: `<button>` not `<div onClick>`, `<nav>` not `<div>`.
