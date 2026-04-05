@@ -1,14 +1,33 @@
 [project]
 name = "weave-compose"
-version = "0.1.0"
+version = "0.3.0"
 description = "Platform-aware skill composition layer for AI coding tools"
+readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.11"
+keywords = ["ai", "skills", "composition", "claude", "cursor", "codex", "windsurf"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "typer",
     "sentence-transformers",
     "numpy",
     "pyyaml",
 ]
+
+[project.urls]
+Homepage = "https://github.com/Adityaraj0421/weave-compose"
+Repository = "https://github.com/Adityaraj0421/weave-compose"
+Changelog = "https://github.com/Adityaraj0421/weave-compose/blob/main/CHANGELOG.md"
+"Bug Tracker" = "https://github.com/Adityaraj0421/weave-compose/issues"
 
 [project.scripts]
 weave = "weave.cli.main:app"

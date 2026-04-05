@@ -28,4 +28,21 @@
 - Annotated `examples/weave.yaml.example` covering every config field with inline comments
 - Config tests, composer tests, selector strategy tests — 60 total
 
+## [v0.3] - 2026-04-05
+
+### Added
+- `CursorAdapter`: reads `*.cursorrules` (plain text) and `.cursor/rules/*.mdc` (YAML frontmatter) files; `platform="cursor"`
+- `CodexAdapter`: reads `AGENTS.md` and `.codex/*.md` files with heading-based name extraction; `platform="codex"`
+- `WindsurfAdapter`: reads `*.windsurfrules` plain-text files; `platform="windsurf"`
+- Platform auto-detector (`detect_platform()`): infers platform from directory structure; covers all 4 supported platforms
+- `weave detect <path>` CLI command
+- Cursor fixtures: `frontend.cursorrules` + `.cursor/rules/typescript.mdc` (MDC format)
+- Codex fixtures: `AGENTS.md` (Security Code Reviewer) + `.codex/devops.md` (DevOps Agent)
+- Windsurf fixtures: `python_standards.windsurfrules` + `api_design.windsurfrules`
+- Cross-platform e2e tests: loads claude_code + cursor + codex fixtures and asserts domain-specific queries route to the correct platform's skill
+- `examples/cross-platform/`: working example with `SKILL.md` + `.cursorrules` composing together, with full README
+- PyPI release workflow (`.github/workflows/release.yml`): OIDC trusted publishing on `v*` tags
+- `pyproject.toml` updated with classifiers, `[project.urls]`, keywords, README, and license metadata
+- 93 tests passing across all modules and all 4 platform adapters
+
 ## [Unreleased]
