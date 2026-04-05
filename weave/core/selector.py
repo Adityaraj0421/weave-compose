@@ -3,6 +3,8 @@
 import logging
 from typing import Any, ClassVar, cast
 
+import numpy as np
+
 from sentence_transformers import SentenceTransformer
 
 from weave.core.schema import Skill
@@ -72,3 +74,26 @@ class SentenceTransformerEmbedder:
         """
         combined = f"{skill.trigger_context} {' '.join(skill.capabilities)}"
         return self.embed(combined)
+
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    """Compute cosine similarity between two float vectors.
+
+    Uses numpy for the dot product and norm calculations. Returns 0.0 when
+    either input is a zero vector to avoid division by zero.
+
+    Args:
+        a: First float vector.
+        b: Second float vector. Must be the same length as ``a``.
+
+    Returns:
+        Similarity score in the range [-1, 1]. Returns 0.0 if either
+        vector is a zero vector.
+    """
+    arr_a = np.array(a)
+    arr_b = np.array(b)
+    norm_a = float(np.linalg.norm(arr_a))
+    norm_b = float(np.linalg.norm(arr_b))
+    if norm_a == 0.0 or norm_b == 0.0:
+        return 0.0
+    return float(np.dot(arr_a, arr_b) / (norm_a * norm_b))
