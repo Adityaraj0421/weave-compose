@@ -1,3 +1,8 @@
+[![CI](https://github.com/Adityaraj0421/weave-compose/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Adityaraj0421/weave-compose/actions/workflows/ci.yml)
+[![PyPI version](https://badge.fury.io/py/weave-compose.svg)](https://pypi.org/project/weave-compose/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Adityaraj0421/weave-compose/blob/main/LICENSE)
+
 # weave-compose
 
 Platform-aware skill composition layer for AI coding tools.
