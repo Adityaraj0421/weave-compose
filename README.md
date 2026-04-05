@@ -154,3 +154,7 @@ All code must pass `pytest`, `ruff check .`, and `mypy --strict .` before mergin
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+---
+
+See [CHANGELOG.md](CHANGELOG.md) for the full release history.
