@@ -1,2 +1,20 @@
-# weave.yaml — project config. Full schema defined in Chunk 0.1.2.
+# weave.yaml — Weave project config for weave-compose itself.
+# Run `weave run` from the project root to try the interactive query loop.
+
 version: "1"
+
+# Points at the Claude Code fixture skills bundled with the repo.
+skills:
+  - path: ./tests/fixtures/claude_code
+    platform: claude_code
+
+# Composition defaults — see examples/weave.yaml.example for full annotation.
+composition:
+  strategy: dynamic
+  max_active_skills: 2
+  confidence_threshold: 0.1
+  model: all-MiniLM-L6-v2
+
+output:
+  verbose: false
+  explain: false

@@ -16,4 +16,16 @@
 - Realistic Claude Code fixtures: `naksha_design.md` (design system) and `backend_api.md` (REST API)
 - Open source scaffold: LICENSE (MIT), README, CHANGELOG, CONTRIBUTORS, docs/, GitHub issue templates, CI workflow
 
+## [v0.2] - 2026-04-05
+
+### Added
+- `WeaveComposer` with dynamic (full `raw_content`) and minimal (`trigger_context` + capabilities) merge strategies; line-level deduplication across skill blocks
+- `weave.yaml` config loader with full validation: required fields, supported platforms (`claude_code`, `cursor`, `codex`, `windsurf`), supported strategies; typed `WeaveConfig` dataclass
+- `weave run` interactive mode: readline-powered query loop driven by `weave.yaml`
+- `always-merge` and `manual` activation strategies on `WeaveSelector` (`select_all`, `select_manual`)
+- `weave query --output composed` flag: prints full merged context via `WeaveComposer`
+- `SentenceTransformerEmbedder` and `cosine_similarity` extracted to `embedder.py` (clean separation from selection logic)
+- Annotated `examples/weave.yaml.example` covering every config field with inline comments
+- Config tests, composer tests, selector strategy tests — 60 total
+
 ## [Unreleased]
