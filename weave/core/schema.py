@@ -82,3 +82,30 @@ class Skill:
             "metadata": self.metadata,
             "loaded_at": self.loaded_at,
         }
+
+    def validate(self) -> None:
+        """Validate that all required string fields are non-empty.
+
+        Checks id, name, platform, source_path, trigger_context, raw_content,
+        and loaded_at. Does not mutate the Skill. list and dict fields
+        (capabilities, embedding, metadata) are not checked — empty collections
+        are valid defaults.
+
+        Raises:
+            ValueError: If any required string field is empty or whitespace-only,
+                with a message indicating the field name and the value received.
+        """
+        required: dict[str, str] = {
+            "id": self.id,
+            "name": self.name,
+            "platform": self.platform,
+            "source_path": self.source_path,
+            "trigger_context": self.trigger_context,
+            "raw_content": self.raw_content,
+            "loaded_at": self.loaded_at,
+        }
+        for field, value in required.items():
+            if not value.strip():
+                raise ValueError(
+                    f"Skill field '{field}' must not be empty — got: {value!r}"
+                )
