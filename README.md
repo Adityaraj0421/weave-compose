@@ -41,22 +41,28 @@ Requires **Python 3.11+**. All embeddings run locally — no API key, no cloud d
 ## Quickstart
 
 ```bash
-# 1. Load skills from a directory of SKILL.md files
-weave load ./tests/fixtures/claude_code
-# Loaded 2 skill(s) from ./tests/fixtures/claude_code (platform: claude_code)
+# 1. Create a minimal SKILL.md file
+mkdir my-skills
+cat > my-skills/SKILL.md << 'EOF'
+---
+description: React component design with Tailwind CSS and accessibility best practices.
+capabilities: [react, tailwind, components, accessibility]
+---
+Always use semantic HTML. Never hardcode colours — use Tailwind tokens only.
+EOF
+
+# 2. Load and query
+weave load ./my-skills
+# Loaded 1 skill(s) from ./my-skills (platform: claude_code)
 # Session saved to .weave_session.json
 
-# 2. Query for the best skill for your task
-weave query "design a UI component with Tailwind CSS"
-# [1] Naksha Design System (claude_code) — score: 0.6821
-#     UI component design and design system implementation for React applications using Tailwind CSS.
+weave query "design a button component"
+# [1] my-skills (claude_code) — score: 0.61
+#     React component design with Tailwind CSS and accessibility best practices.
 
-# 3. List all loaded skills
-weave list
-#   Naksha Design System           claude_code     [design, components, ui...]
-#   Backend API Engineer           claude_code     [api, rest, fastapi...]
-#
-# Total: 2 skill(s)
+# 3. Explore further
+weave list    # see all loaded skills
+weave status  # session info and embedding model in use
 ```
 
 ---
