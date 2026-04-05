@@ -106,3 +106,80 @@ def test_load_session_on_missing_file_leaves_registry_empty(
     """load_session() on a non-existent path logs a warning and does not raise."""
     registry.load_session("/nonexistent/path/weave_session.json")
     assert registry.count() == 0
+
+
+# ---------------------------------------------------------------------------
+# Dependency resolution tests
+# ---------------------------------------------------------------------------
+
+def test_get_by_name_returns_matching_skill(
+    registry: SkillRegistry, skill: Skill
+) -> None:
+    """get_by_name() returns the skill whose name matches exactly."""
+    registry.register(skill)
+    result = registry.get_by_name("Test Skill")
+    assert result is skill
+
+
+def test_get_by_name_returns_none_for_unknown_name(
+    registry: SkillRegistry,
+) -> None:
+    """get_by_name() returns None when no skill has the requested name."""
+    result = registry.get_by_name("nonexistent")
+    assert result is None
+
+
+def test_resolve_dependencies_returns_declared_skills(
+    registry: SkillRegistry, skill: Skill
+) -> None:
+    """resolve_dependencies() returns registry skills named in metadata dependencies."""
+    skill_a = Skill(
+        id="dep-id-001",
+        name="Test Skill A",
+        platform="claude_code",
+        source_path="/tmp/a.md",
+        capabilities=["dep"],
+        trigger_context="Dependency skill A",
+        raw_content="# A",
+        embedding=[],
+        metadata={},
+        loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    skill_b = Skill(
+        id="dep-id-002",
+        name="Test Skill B",
+        platform="claude_code",
+        source_path="/tmp/b.md",
+        capabilities=["main"],
+        trigger_context="Main skill B that depends on A",
+        raw_content="# B",
+        embedding=[],
+        metadata={"dependencies": ["Test Skill A"]},
+        loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    registry.register(skill_a)
+    registry.register(skill_b)
+    resolved = registry.resolve_dependencies(skill_b)
+    assert len(resolved) == 1
+    assert resolved[0] is skill_a
+
+
+def test_resolve_dependencies_returns_empty_for_missing_dep(
+    registry: SkillRegistry,
+) -> None:
+    """resolve_dependencies() returns [] and does not crash when dep is absent."""
+    skill_with_missing_dep = Skill(
+        id="dep-id-003",
+        name="Skill With Missing Dep",
+        platform="claude_code",
+        source_path="/tmp/c.md",
+        capabilities=[],
+        trigger_context="Skill that declares a missing dependency",
+        raw_content="# C",
+        embedding=[],
+        metadata={"dependencies": ["Missing Skill"]},
+        loaded_at="2026-04-05T10:00:00+00:00",
+    )
+    registry.register(skill_with_missing_dep)
+    resolved = registry.resolve_dependencies(skill_with_missing_dep)
+    assert resolved == []

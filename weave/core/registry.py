@@ -37,10 +37,10 @@ class SkillRegistry:
         logger.info("Registered skill %r (platform: %s)", skill.name, skill.platform)
 
     def get_all(self) -> list[Skill]:
-        """Return all registered skills.
+        """Return all registered skills in insertion order.
 
         Returns:
-            List of all Skill objects in insertion order (dict-order, Python 3.7+).
+            List of all Skill objects.
         """
         return list(self._store.values())
 
@@ -72,11 +72,7 @@ class SkillRegistry:
         logger.info("Registry cleared")
 
     def count(self) -> int:
-        """Return the number of skills currently in the registry.
-
-        Returns:
-            Integer count of registered skills.
-        """
+        """Return the number of skills currently in the registry."""
         return len(self._store)
 
     def save_session(self, path: str) -> None:
@@ -125,6 +121,56 @@ class SkillRegistry:
             logger.warning(
                 "Malformed session file at %s — starting fresh: %s", path, exc
             )
+
+    def get_by_name(self, name: str) -> Skill | None:
+        """Return the first skill whose name matches exactly, or None.
+
+        Linear scan; first match returned when names are not unique.
+
+        Args:
+            name: Exact skill name string to search for.
+
+        Returns:
+            The first matching Skill, or None if no skill has that name.
+        """
+        for skill in self._store.values():
+            if skill.name == name:
+                return skill
+        return None
+
+    def resolve_dependencies(self, skill: Skill) -> list[Skill]:
+        """Resolve the dependency skills declared in a skill's manifest.
+
+        Reads ``skill.metadata.get("dependencies", [])`` for skill names and
+        looks each up via ``get_by_name()``. Found deps are returned; missing
+        ones log a WARNING directing the user to load them first. Read-only —
+        does not modify the registry or the skill.
+
+        Args:
+            skill: The Skill whose declared dependencies should be resolved.
+
+        Returns:
+            List of resolved Skill objects. Empty list if the skill declares
+            no dependencies or none of the declared names are in the registry.
+        """
+        raw_deps = skill.metadata.get("dependencies", [])
+        if not isinstance(raw_deps, list):
+            return []
+
+        resolved: list[Skill] = []
+        for dep_name in raw_deps:
+            name_str = str(dep_name)
+            dep_skill = self.get_by_name(name_str)
+            if dep_skill is not None:
+                resolved.append(dep_skill)
+            else:
+                logger.warning(
+                    "Dependency %r declared by %r not found in registry"
+                    " — load it with `weave load` first",
+                    name_str,
+                    skill.name,
+                )
+        return resolved
 
     def _skill_from_dict(self, raw: dict[str, Any]) -> Skill:
         """Reconstruct a Skill from a plain dictionary (e.g. loaded from JSON).
