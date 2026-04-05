@@ -85,3 +85,21 @@ def test_clear_deletes_session_file(
     result = runner.invoke(app, ["clear"], input="y\n")
     assert result.exit_code == 0
     assert not session.exists()
+
+
+def test_detect_prints_platform_for_claude_code_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """weave detect prints 'Detected platform: claude_code' for a dir with SKILL.md."""
+    monkeypatch.chdir(tmp_path)
+    (tmp_path / "SKILL.md").touch()
+    result = runner.invoke(app, ["detect", str(tmp_path)])
+    assert result.exit_code == 0
+    assert "Detected platform: claude_code" in result.output
+
+
+def test_detect_prints_unknown_for_empty_dir(tmp_path: Path) -> None:
+    """weave detect prints 'Unknown platform' for an empty directory."""
+    result = runner.invoke(app, ["detect", str(tmp_path)])
+    assert result.exit_code == 0
+    assert "Unknown platform" in result.output
