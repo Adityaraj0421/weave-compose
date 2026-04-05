@@ -7,6 +7,7 @@ import numpy as np
 
 from sentence_transformers import SentenceTransformer
 
+from weave.core.registry import SkillRegistry
 from weave.core.schema import Skill
 
 logger = logging.getLogger(__name__)
@@ -97,3 +98,75 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     if norm_a == 0.0 or norm_b == 0.0:
         return 0.0
     return float(np.dot(arr_a, arr_b) / (norm_a * norm_b))
+
+
+class WeaveSelector:
+    """Selects the best skill(s) for a query using semantic similarity.
+
+    Embeds the query text and each skill's context, computes cosine similarity,
+    and returns the top match(es). When the top two scores are within
+    ``confidence_threshold`` of each other, both are returned for composition.
+    """
+
+    def __init__(self) -> None:
+        """Initialise the selector with a fresh embedder instance."""
+        self._embedder = SentenceTransformerEmbedder()
+
+    def select(
+        self,
+        query: str,
+        registry: SkillRegistry,
+        top_n: int = 1,
+        confidence_threshold: float = 0.1,
+        max_active_skills: int = 2,
+        explain: bool = False,
+    ) -> list[tuple[Skill, float]]:
+        """Select the best skill(s) from the registry for the given query.
+
+        Embeds the query, scores every registered skill by cosine similarity,
+        and returns the top result(s). If ``top_n`` is 1 and the second-best
+        score is within ``confidence_threshold`` of the best, both are returned
+        for composition. The result is always capped at ``max_active_skills``.
+
+        Skills with an empty ``embedding`` field are embedded on-the-fly using
+        ``embed_skill()``, so the selector works even before a session save.
+
+        Args:
+            query: Natural language task description to match against skills.
+            registry: The SkillRegistry to search.
+            top_n: Minimum number of top skills to return.
+            confidence_threshold: Maximum score gap between rank-1 and rank-2
+                for both to be returned when top_n is 1.
+            max_active_skills: Hard cap on the number of skills returned.
+            explain: If True, logs a score table at INFO level for debugging.
+
+        Returns:
+            List of (Skill, score) tuples sorted by score descending.
+            Empty list if the registry contains no skills.
+        """
+        skills = registry.get_all()
+        if not skills:
+            return []
+
+        query_vec = self._embedder.embed(query)
+
+        scored: list[tuple[Skill, float]] = []
+        for skill in skills:
+            vec = skill.embedding if skill.embedding else self._embedder.embed_skill(skill)
+            score = cosine_similarity(query_vec, vec)
+            scored.append((skill, score))
+
+        scored.sort(key=lambda t: t[1], reverse=True)
+
+        if explain:
+            logger.info("WeaveSelector scores for query: %r", query)
+            for skill, score in scored:
+                logger.info("  %.4f  %s (%s)", score, skill.name, skill.platform)
+
+        result = scored[:top_n]
+        if top_n == 1 and len(scored) >= 2:
+            gap = scored[0][1] - scored[1][1]
+            if gap < confidence_threshold:
+                result = scored[:2]
+
+        return result[:max_active_skills]
