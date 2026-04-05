@@ -6,7 +6,7 @@ labels: bug
 
 ## Environment
 
-- Weave version: [e.g. 0.1.0]
+- Weave version: [e.g. 1.0.0]
 - Python version: [e.g. 3.11.4]
 - OS: [e.g. macOS 14, Ubuntu 22.04]
 - Platform adapter in use: [e.g. claude_code, cursor, codex, windsurf]
