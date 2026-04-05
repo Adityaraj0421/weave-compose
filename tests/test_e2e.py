@@ -5,12 +5,15 @@ from pathlib import Path
 import pytest
 
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
+from weave.core.adapters.codex import CodexAdapter
+from weave.core.adapters.cursor import CursorAdapter
 from weave.core.composer import WeaveComposer
 from weave.core.registry import SkillRegistry
 from weave.core.selector import WeaveSelector
 
 CLAUDE_FIXTURES = Path(__file__).parent / "fixtures" / "claude_code"
 CODEX_FIXTURES = Path(__file__).parent / "fixtures" / "codex"
+CURSOR_FIXTURES = Path(__file__).parent / "fixtures" / "cursor"
 
 
 @pytest.fixture(scope="module")
@@ -53,6 +56,24 @@ def combined_registry() -> SkillRegistry:
     return reg
 
 
+@pytest.fixture(scope="module")
+def cross_platform_registry() -> SkillRegistry:
+    """Return a registry populated from claude_code, cursor, and codex fixtures.
+
+    Each platform is loaded via its native adapter. Module-scoped so file
+    loading and embedding run once per test session. 6 skills total: 2 per platform.
+    """
+    reg = SkillRegistry()
+    for adapter, path in (
+        (ClaudeCodeAdapter(), str(CLAUDE_FIXTURES)),
+        (CursorAdapter(), str(CURSOR_FIXTURES)),
+        (CodexAdapter(), str(CODEX_FIXTURES)),
+    ):
+        for skill in adapter.load(path):
+            reg.register(skill)
+    return reg
+
+
 def test_e2e_design_query_returns_design_skill(
     selector: WeaveSelector, registry: SkillRegistry
 ) -> None:
@@ -87,6 +108,62 @@ def test_e2e_multi_skill_composition(
     )
     assert len(results) == 2
 
+    composed = WeaveComposer().compose(results)
+    assert results[0][0].name in composed
+    assert results[1][0].name in composed
+
+
+# ---------------------------------------------------------------------------
+# Cross-platform integration tests (Phase 3)
+# ---------------------------------------------------------------------------
+
+
+def test_cross_platform_design_query_returns_claude_code_skill(
+    selector: WeaveSelector, cross_platform_registry: SkillRegistry
+) -> None:
+    """Design query returns a claude_code skill as the top result."""
+    results = selector.select(
+        "design UI components with React and design system tokens",
+        cross_platform_registry,
+    )
+    assert len(results) >= 1
+    assert results[0][0].platform == "claude_code"
+
+
+def test_cross_platform_typescript_query_returns_cursor_skill(
+    selector: WeaveSelector, cross_platform_registry: SkillRegistry
+) -> None:
+    """TypeScript strict mode query returns a cursor skill as the top result."""
+    results = selector.select(
+        "enforce TypeScript strict mode and avoid using any types",
+        cross_platform_registry,
+    )
+    assert len(results) >= 1
+    assert results[0][0].platform == "cursor"
+
+
+def test_cross_platform_security_query_returns_codex_skill(
+    selector: WeaveSelector, cross_platform_registry: SkillRegistry
+) -> None:
+    """Security audit query returns a codex skill as the top result."""
+    results = selector.select(
+        "audit code for SQL injection and OWASP security vulnerabilities",
+        cross_platform_registry,
+    )
+    assert len(results) >= 1
+    assert results[0][0].platform == "codex"
+
+
+def test_cross_platform_composition_contains_both_skill_names(
+    selector: WeaveSelector, cross_platform_registry: SkillRegistry
+) -> None:
+    """Cross-platform composition output contains both top skill names."""
+    results = selector.select(
+        "programming",
+        cross_platform_registry,
+        confidence_threshold=1.5,
+    )
+    assert len(results) == 2
     composed = WeaveComposer().compose(results)
     assert results[0][0].name in composed
     assert results[1][0].name in composed

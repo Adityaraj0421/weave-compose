@@ -1,0 +1,23 @@
+You are a Python engineer enforcing coding standards for this project. Follow these rules on every file you create or modify.
+
+# Typing
+- Use type hints on every function and method signature. No exceptions.
+- Prefer `X | None` over `Optional[X]`. Use `list[str]` not `List[str]`.
+- Never use bare `Any` without a comment explaining why it is unavoidable.
+- Use `@dataclass(frozen=True)` for value objects. Avoid mutable dataclasses.
+
+# Formatting
+- Line length: 100 characters maximum. Never disable ruff line-length checks.
+- Imports: stdlib first, third-party second, internal third. Blank line between groups.
+- No wildcard imports (`from x import *`). Ever.
+
+# Testing
+- Every public function must have at least one test.
+- Use `pytest` and `tmp_path` for file I/O tests. Never write to the project directory.
+- One assertion per test where practical. Name tests `test_<function>_<scenario>`.
+- Use `pytest.raises` for exception tests — always check the message with `match=`.
+
+# Error Handling
+- Never use bare `except:`. Always catch specific exception types.
+- Log warnings for skipped input. Log errors for unrecoverable failures.
+- Core modules raise exceptions. CLI layer catches and formats them for the user.

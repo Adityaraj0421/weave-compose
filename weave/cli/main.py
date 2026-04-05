@@ -10,6 +10,7 @@ from weave.cli.query_command import query as _query_command
 from weave.cli.run_command import run as _run_command
 from weave.core.adapters.base import BaseAdapter
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
+from weave.core.detector import detect_platform
 from weave.core.registry import SkillRegistry
 
 logger = logging.getLogger(__name__)
@@ -155,6 +156,25 @@ def clear() -> None:
     registry.clear()
     Path(SESSION_FILE).unlink(missing_ok=True)
     typer.echo("Registry cleared.")
+
+
+@app.command()
+def detect(
+    path: str = typer.Argument(..., help="Path to directory to auto-detect platform for"),
+) -> None:
+    """Detect the platform of a skill directory from its file structure.
+
+    Inspects the directory at path and prints the detected platform name,
+    or an informational message if no platform could be identified.
+
+    Args:
+        path: Absolute or relative path to the directory to inspect.
+    """
+    platform = detect_platform(path)
+    if platform == "unknown":
+        typer.echo("Unknown platform — could not detect from directory contents")
+    else:
+        typer.echo(f"Detected platform: {platform}")
 
 
 app.command(name="query")(_query_command)

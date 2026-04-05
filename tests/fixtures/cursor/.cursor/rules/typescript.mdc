@@ -1,0 +1,25 @@
+---
+name: TypeScript Strict Rules
+description: Enforces strict TypeScript conventions for this codebase. Prefer interfaces over types, avoid any, always declare explicit return types on all functions.
+globs: ["*.ts", "*.tsx"]
+---
+
+# TypeScript Conventions
+
+All TypeScript files in this project must follow these rules without exception.
+
+## Types and Interfaces
+- Use `interface` for object shapes, `type` for unions and intersections only.
+- Never use `any`. Use `unknown` and narrow with type guards.
+- Always declare explicit return types on functions and methods.
+- Use `as const` for constant objects and enum-like values.
+
+## Strictness
+- Enable `strict: true` in tsconfig. Never disable strict flags locally.
+- Never use non-null assertion (`!`) unless narrowing is impossible.
+- Prefer optional chaining (`?.`) and nullish coalescing (`??`) over manual null checks.
+
+## Imports
+- Use named imports only. Avoid default imports from internal modules.
+- Group imports: external packages, then internal modules, then types.
+- Use path aliases (`@/`) — never traverse with `../../../`.
