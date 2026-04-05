@@ -9,6 +9,7 @@ from weave.cli.config import load_config
 from weave.core.adapters.base import BaseAdapter
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
 from weave.core.composer import WeaveComposer
+from weave.core.persistent_registry import PersistentRegistry
 from weave.core.registry import SkillRegistry
 from weave.core.selector import WeaveSelector
 
@@ -45,6 +46,11 @@ def run(
         "-c",
         help="Path to weave.yaml config file (default: ./weave.yaml)",
     ),
+    persist: bool = typer.Option(
+        False,
+        "--persist",
+        help="Reload skills from ChromaDB on startup (requires: pip install weave-compose[persist])",
+    ),
 ) -> None:
     """Load skills from weave.yaml and start an interactive query loop.
 
@@ -54,8 +60,13 @@ def run(
     natural-language query; the best matching skill(s) and their composed
     context are printed. Press Ctrl+C or Ctrl+D to exit.
 
+    With ``--persist``, skills are restored from a local ChromaDB store on
+    startup. On the first run, skills are loaded from the config and persisted;
+    on subsequent runs the ChromaDB data is used directly, skipping re-embedding.
+
     Args:
         config: Path to the weave.yaml config file.
+        persist: Restore skills from ChromaDB instead of re-loading from config.
     """
     try:
         cfg = load_config(config)
@@ -66,19 +77,21 @@ def run(
         typer.echo(f"Error: {exc}", err=True)
         raise typer.Exit(code=1) from exc
 
-    registry = SkillRegistry()
-    total_loaded = 0
+    registry: SkillRegistry = PersistentRegistry() if persist else SkillRegistry()
+    from_chromadb: int = registry.count()
+    total_loaded: int = from_chromadb
 
-    for entry in cfg.skills:
-        adapter = _resolve_adapter(entry.platform)
-        try:
-            skills = adapter.load(entry.path)
-        except FileNotFoundError as exc:
-            typer.echo(f"Warning: skipping {entry.path!r} — {exc}", err=True)
-            continue
-        for skill in skills:
-            registry.register(skill)
-        total_loaded += len(skills)
+    if from_chromadb == 0:
+        for entry in cfg.skills:
+            adapter = _resolve_adapter(entry.platform)
+            try:
+                skills = adapter.load(entry.path)
+            except FileNotFoundError as exc:
+                typer.echo(f"Warning: skipping {entry.path!r} — {exc}", err=True)
+                continue
+            for skill in skills:
+                registry.register(skill)
+            total_loaded += len(skills)
 
     if registry.count() == 0:
         typer.echo(
@@ -86,9 +99,12 @@ def run(
         )
         raise typer.Exit(code=1)
 
-    typer.echo(
-        f"Loaded {total_loaded} skill(s) from {len(cfg.skills)} source(s). Ready."
-    )
+    if from_chromadb > 0:
+        typer.echo(f"Loaded {total_loaded} skill(s) from ChromaDB. Ready.")
+    else:
+        typer.echo(
+            f"Loaded {total_loaded} skill(s) from {len(cfg.skills)} source(s). Ready."
+        )
     typer.echo("Type a query to find the best skill. Ctrl+C or Ctrl+D to exit.\n")
 
     selector = WeaveSelector()
