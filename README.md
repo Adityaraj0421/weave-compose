@@ -102,6 +102,15 @@ weave query "build a feature" --top 2
 
 ---
 
+## Learn More
+
+- [Full changelog](CHANGELOG.md) — every release, what changed and why
+- [GitHub Releases](https://github.com/Adityaraj0421/weave-compose/releases) — tagged release notes
+- [Known limitations](docs/limitations.md) — documented gaps before you file an issue
+- [Project roadmap](docs/roadmap.md) — what shipped and what's coming next
+
+---
+
 ## Contributing
 
 Contributions are welcome at every layer — new platform adapters, composition strategies, CLI improvements, and documentation.
