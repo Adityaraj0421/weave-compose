@@ -183,3 +183,13 @@ def status() -> None:
         typer.echo(f"Last saved:      {saved_at}")
     else:
         typer.echo("Session file:    not found")
+
+
+@app.command()
+def clear() -> None:
+    """Clear all loaded skills and delete the session file."""
+    typer.confirm("Clear all loaded skills?", abort=True)
+    registry = SkillRegistry()
+    registry.clear()
+    Path(SESSION_FILE).unlink(missing_ok=True)
+    typer.echo("Registry cleared.")
