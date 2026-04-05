@@ -1,111 +1,25 @@
-"""Skill selector using sentence-transformers embeddings and cosine similarity."""
+"""Skill selector using semantic similarity and activation strategy dispatch."""
 
 import logging
-from typing import Any, ClassVar, cast
 
-import numpy as np
-
-from sentence_transformers import SentenceTransformer
-
+from weave.core.embedder import SentenceTransformerEmbedder, cosine_similarity
 from weave.core.registry import SkillRegistry
 from weave.core.schema import Skill
 
 logger = logging.getLogger(__name__)
 
 
-class SentenceTransformerEmbedder:
-    """Embeds text and Skill objects using a local sentence-transformers model.
-
-    The model (``all-MiniLM-L6-v2``) is loaded lazily on the first call to
-    ``embed()`` and cached as a class attribute, so subsequent calls within
-    the same process reuse the loaded model without reloading weights.
-
-    Attributes:
-        _model: Class-level cache for the loaded SentenceTransformer instance.
-            None until the first embed call. Typed as Any because
-            sentence_transformers has no mypy stubs.
-    """
-
-    _model: ClassVar[Any] = None
-
-    @classmethod
-    def _get_model(cls) -> Any:
-        """Return the cached model, loading it on first call.
-
-        # NOTE: requires internet on first run, cached after
-        (~/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2)
-
-        Returns:
-            The loaded SentenceTransformer model instance.
-        """
-        if cls._model is None:
-            logger.info("Loading sentence-transformers model all-MiniLM-L6-v2")
-            cls._model = SentenceTransformer("all-MiniLM-L6-v2")
-        return cls._model
-
-    def embed(self, text: str) -> list[float]:
-        """Embed a text string into a float vector.
-
-        Calls ``model.encode()`` which returns a ``numpy.ndarray``. The
-        ``.tolist()`` call converts it to a plain Python ``list[float]``
-        safe for JSON serialisation and Skill storage.
-
-        Args:
-            text: The text string to embed.
-
-        Returns:
-            Float vector as a plain Python list. Length is 384 for
-            ``all-MiniLM-L6-v2``.
-        """
-        raw = self._get_model().encode(text).tolist()
-        return cast(list[float], raw)
-
-    def embed_skill(self, skill: Skill) -> list[float]:
-        """Embed a Skill by combining its trigger_context and capabilities.
-
-        Concatenates ``trigger_context`` (highest signal field) followed by
-        the space-joined ``capabilities`` list into a single string, then
-        delegates to ``embed()``.
-
-        Args:
-            skill: The Skill object to embed.
-
-        Returns:
-            Float vector representing the skill's semantic content.
-        """
-        combined = f"{skill.trigger_context} {' '.join(skill.capabilities)}"
-        return self.embed(combined)
-
-
-def cosine_similarity(a: list[float], b: list[float]) -> float:
-    """Compute cosine similarity between two float vectors.
-
-    Uses numpy for the dot product and norm calculations. Returns 0.0 when
-    either input is a zero vector to avoid division by zero.
-
-    Args:
-        a: First float vector.
-        b: Second float vector. Must be the same length as ``a``.
-
-    Returns:
-        Similarity score in the range [-1, 1]. Returns 0.0 if either
-        vector is a zero vector.
-    """
-    arr_a = np.array(a)
-    arr_b = np.array(b)
-    norm_a = float(np.linalg.norm(arr_a))
-    norm_b = float(np.linalg.norm(arr_b))
-    if norm_a == 0.0 or norm_b == 0.0:
-        return 0.0
-    return float(np.dot(arr_a, arr_b) / (norm_a * norm_b))
-
-
 class WeaveSelector:
-    """Selects the best skill(s) for a query using semantic similarity.
+    """Selects skill(s) for a query using semantic similarity or explicit strategy.
 
-    Embeds the query text and each skill's context, computes cosine similarity,
-    and returns the top match(es). When the top two scores are within
-    ``confidence_threshold`` of each other, both are returned for composition.
+    Three activation strategies are supported:
+
+    - ``dynamic`` — embed the query, rank by cosine similarity, return top match(es).
+      Use :meth:`select`.
+    - ``always-merge`` — return every loaded skill regardless of query relevance.
+      Use :meth:`select_all`.
+    - ``manual`` — caller specifies skill names explicitly; no scoring applied.
+      Use :meth:`select_manual`.
     """
 
     def __init__(self) -> None:
@@ -170,3 +84,55 @@ class WeaveSelector:
                 result = scored[:2]
 
         return result[:max_active_skills]
+
+    def select_all(
+        self,
+        registry: SkillRegistry,
+        max_active_skills: int = 2,
+    ) -> list[tuple[Skill, float]]:
+        """Return all skills in the registry, each with a score of 1.0.
+
+        Implements the ``always-merge`` activation strategy: every loaded skill
+        is returned regardless of query relevance, capped at ``max_active_skills``.
+        Results are returned in registration order (stable and deterministic).
+
+        Args:
+            registry: The SkillRegistry to pull all skills from.
+            max_active_skills: Hard cap on the number of skills returned.
+
+        Returns:
+            List of (Skill, 1.0) tuples. Empty list if the registry is empty.
+        """
+        skills = registry.get_all()
+        logger.info("select_all: returning %d skill(s)", min(len(skills), max_active_skills))
+        return [(skill, 1.0) for skill in skills][:max_active_skills]
+
+    def select_manual(
+        self,
+        names: list[str],
+        registry: SkillRegistry,
+    ) -> list[tuple[Skill, float]]:
+        """Return skills matching the given names, each with a score of 1.0.
+
+        Implements the ``manual`` activation strategy: the caller specifies
+        exactly which skills to activate by name. Matching is case-sensitive.
+        Skills not found in the registry are logged at WARNING level and skipped.
+
+        Args:
+            names: List of skill name strings to look up in the registry.
+            registry: The SkillRegistry to search.
+
+        Returns:
+            List of (Skill, 1.0) tuples in the order of names that matched.
+            Empty list if no names matched any registered skill.
+        """
+        name_map: dict[str, Skill] = {skill.name: skill for skill in registry.get_all()}
+        results: list[tuple[Skill, float]] = []
+        for name in names:
+            if name in name_map:
+                results.append((name_map[name], 1.0))
+            else:
+                logger.warning(
+                    "select_manual: skill %r not found in registry — skipping", name
+                )
+        return results
