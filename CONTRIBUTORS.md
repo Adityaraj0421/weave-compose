@@ -1,3 +1,7 @@
 # Contributors
 
-<!-- Full scaffold added in Chunk 0.2.4 -->
+## Core Team
+- Aditya Raj ([@Adityaraj0421](https://github.com/Adityaraj0421)) — creator
+
+## Contributors
+<!-- Added when first external PR is merged -->
