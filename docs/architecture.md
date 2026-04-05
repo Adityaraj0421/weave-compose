@@ -84,7 +84,7 @@ The `Skill` dataclass in `weave/core/schema.py` is the lingua franca of the enti
 
 ### Output Interfaces
 
-The CLI (`weave/cli/main.py`, built with `typer`) is the primary interface in v0.1. It exposes `weave load`, `weave query`, `weave list`, `weave status`, `weave clear`, `weave detect`, and `weave run`. A local FastAPI server (`weave/server/`) and React UI (`ui/`) are added in Phase 4, but they consume the same selector + composer pipeline — the core is interface-agnostic.
+The CLI (`weave/cli/main.py`, built with `typer`) is the primary interface. It exposes `weave load`, `weave query`, `weave list`, `weave status`, `weave clear`, `weave detect`, `weave run`, and `weave serve`. A local FastAPI server (`weave/server/`) and React UI (`ui/`) are also available — all three consume the same selector + composer pipeline, making the core fully interface-agnostic.
 
 ---
 
