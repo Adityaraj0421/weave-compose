@@ -45,4 +45,16 @@
 - `pyproject.toml` updated with classifiers, `[project.urls]`, keywords, README, and license metadata
 - 93 tests passing across all modules and all 4 platform adapters
 
+## [v0.4] - 2026-04-05
+
+### Added
+- `PersistentRegistry` with optional ChromaDB backend (`pip install weave-compose[persist]`); falls back to in-memory if ChromaDB not installed
+- `--persist` flag on `weave load`, `weave run`, and `weave clear` for cross-session skill persistence
+- FastAPI local server (`weave serve --port 7842`) with endpoints: `GET /skills`, `POST /load`, `POST /query`, `POST /compose`, `GET /status`
+- React + Vite + Tailwind UI at `http://localhost:5173` — connects to the local FastAPI server
+- Skill browser: responsive card grid with platform filter and full-detail slide-in panel
+- Visual composer: query input → matched skills with confidence scores → composed context with one-click copy
+- Load panel: directory path input + platform selector → live registry status breakdown after load
+- 106 tests passing (1 skipped — ChromaDB integration, requires optional dep)
+
 ## [Unreleased]

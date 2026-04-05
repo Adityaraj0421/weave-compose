@@ -38,6 +38,14 @@ dev = [
     "ruff",
     "mypy",
     "types-PyYAML",
+    "httpx",
+]
+persist = [
+    "chromadb",
+]
+server = [
+    "fastapi",
+    "uvicorn",
 ]
 
 [tool.setuptools.packages.find]
@@ -55,6 +63,14 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = "sentence_transformers"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "chromadb"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "chromadb.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
