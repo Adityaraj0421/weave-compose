@@ -1,11 +1,15 @@
 """Tests for all platform adapters."""
 
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 
 from weave.core.adapters.base import BaseAdapter
+from weave.core.adapters.claude_code import ClaudeCodeAdapter
 from weave.core.schema import Skill
+
+CLAUDE_FIXTURES = Path(__file__).parent / "fixtures" / "claude_code"
 
 
 class _ConcreteAdapter(BaseAdapter):
@@ -38,3 +42,61 @@ def test_timestamp_returns_valid_iso_format() -> None:
     parsed = datetime.fromisoformat(result)
     assert result.endswith("+00:00"), f"Expected UTC offset '+00:00', got: {result!r}"
     assert parsed.tzinfo is not None
+
+
+# ---------------------------------------------------------------------------
+# ClaudeCodeAdapter tests
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def adapter() -> ClaudeCodeAdapter:
+    """Return a fresh ClaudeCodeAdapter instance for each test."""
+    return ClaudeCodeAdapter()
+
+
+def test_claude_load_returns_all_skills_from_directory(adapter: ClaudeCodeAdapter) -> None:
+    """load() returns one Skill per .md file found in the fixtures directory."""
+    skills = adapter.load(str(CLAUDE_FIXTURES))
+    assert len(skills) == 2
+
+
+def test_claude_load_parses_frontmatter_name(adapter: ClaudeCodeAdapter) -> None:
+    """load() correctly reads the name field from YAML frontmatter."""
+    skills = adapter.load(str(CLAUDE_FIXTURES))
+    names = {s.name for s in skills}
+    assert "Backend API Engineer" in names
+
+
+def test_claude_load_falls_back_to_filename_when_no_frontmatter(
+    adapter: ClaudeCodeAdapter, tmp_path: Path
+) -> None:
+    """load() uses the file stem as name when no YAML frontmatter is present."""
+    md_file = tmp_path / "my_skill.md"
+    md_file.write_text("This skill handles data processing tasks.\n\nMore content here.")
+    skills = adapter.load(str(tmp_path))
+    assert skills[0].name == "my_skill"
+
+
+def test_claude_load_handles_empty_file_without_crashing(
+    adapter: ClaudeCodeAdapter, tmp_path: Path
+) -> None:
+    """load() skips empty .md files and returns an empty list without raising."""
+    (tmp_path / "empty.md").write_text("")
+    skills = adapter.load(str(tmp_path))
+    assert skills == []
+
+
+def test_claude_load_returns_empty_list_for_directory_with_no_md_files(
+    adapter: ClaudeCodeAdapter, tmp_path: Path
+) -> None:
+    """load() returns an empty list when the directory contains no .md files."""
+    skills = adapter.load(str(tmp_path))
+    assert skills == []
+
+
+def test_claude_detect_returns_true_for_directory_with_md_files(
+    adapter: ClaudeCodeAdapter,
+) -> None:
+    """detect() returns True for the claude_code fixtures directory."""
+    assert adapter.detect(str(CLAUDE_FIXTURES)) is True
