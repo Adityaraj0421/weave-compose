@@ -39,6 +39,9 @@ dev = [
     "mypy",
     "types-PyYAML",
 ]
+persist = [
+    "chromadb",
+]
 
 [tool.setuptools.packages.find]
 include = ["weave*"]
@@ -55,6 +58,14 @@ strict = true
 
 [[tool.mypy.overrides]]
 module = "sentence_transformers"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "chromadb"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "chromadb.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
