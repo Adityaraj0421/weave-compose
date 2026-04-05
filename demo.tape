@@ -18,7 +18,7 @@ Sleep 1s
 # Step 1: Load skills from Claude Code fixtures
 Type "weave load ./tests/fixtures/claude_code"
 Enter
-Sleep 6s
+Sleep 15s
 
 # Step 2: Query for a design task
 Type "weave query 'design a button component'"
