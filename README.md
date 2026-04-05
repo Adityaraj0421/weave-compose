@@ -70,6 +70,9 @@ weave list
 | `weave list [--platform]` | List all skills in the current session |
 | `weave status` | Show skill count, platform breakdown, and session info |
 | `weave clear` | Clear all loaded skills and delete the session file |
+| `weave detect <path>` | Auto-detect the platform of a skill directory |
+| `weave run [--config <path>]` | Load skills from weave.yaml and start an interactive query loop |
+| `weave serve [--port <n>]` | Start the local FastAPI server on localhost (default port: 7842) |
 
 Session state is stored in `.weave_session.json` in your current working directory. Run `weave load` once; all subsequent `query`, `list`, and `status` calls restore the session automatically — no re-embedding required.
 
