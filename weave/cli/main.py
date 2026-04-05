@@ -8,6 +8,7 @@ import typer
 
 from weave.cli.query_command import query as _query_command
 from weave.cli.run_command import run as _run_command
+from weave.cli.serve_command import serve as _serve_command
 from weave.core.adapters.base import BaseAdapter
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
 from weave.core.detector import detect_platform
@@ -90,7 +91,6 @@ def load(
     if verbose:
         for skill in skills:
             typer.echo(f"  {skill.name} ({len(skill.capabilities)} capabilities)")
-
 
 
 @app.command(name="list")
@@ -193,3 +193,4 @@ def detect(
 
 app.command(name="query")(_query_command)
 app.command(name="run")(_run_command)
+app.command(name="serve")(_serve_command)
