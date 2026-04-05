@@ -7,9 +7,11 @@ import pytest
 
 from weave.core.adapters.base import BaseAdapter
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
+from weave.core.adapters.cursor import CursorAdapter
 from weave.core.schema import Skill
 
 CLAUDE_FIXTURES = Path(__file__).parent / "fixtures" / "claude_code"
+CURSOR_FIXTURES = Path(__file__).parent / "fixtures" / "cursor"
 
 
 class _ConcreteAdapter(BaseAdapter):
@@ -53,6 +55,12 @@ def test_timestamp_returns_valid_iso_format() -> None:
 def adapter() -> ClaudeCodeAdapter:
     """Return a fresh ClaudeCodeAdapter instance for each test."""
     return ClaudeCodeAdapter()
+
+
+@pytest.fixture
+def cursor_adapter() -> CursorAdapter:
+    """Return a fresh CursorAdapter instance for each test."""
+    return CursorAdapter()
 
 
 def test_claude_load_returns_all_skills_from_directory(adapter: ClaudeCodeAdapter) -> None:
@@ -100,3 +108,56 @@ def test_claude_detect_returns_true_for_directory_with_md_files(
 ) -> None:
     """detect() returns True for the claude_code fixtures directory."""
     assert adapter.detect(str(CLAUDE_FIXTURES)) is True
+
+
+# ---------------------------------------------------------------------------
+# CursorAdapter tests
+# ---------------------------------------------------------------------------
+
+
+def test_cursor_load_returns_all_skills_from_directory(
+    cursor_adapter: CursorAdapter,
+) -> None:
+    """load() returns one Skill per cursor file found (cursorrules + mdc)."""
+    skills = cursor_adapter.load(str(CURSOR_FIXTURES))
+    assert len(skills) == 2
+
+
+def test_cursor_load_parses_cursorrules_name(cursor_adapter: CursorAdapter) -> None:
+    """load() uses the file stem as name for plain .cursorrules files."""
+    skills = cursor_adapter.load(str(CURSOR_FIXTURES))
+    names = {s.name for s in skills}
+    assert "frontend" in names
+
+
+def test_cursor_load_parses_mdc_frontmatter_description(
+    cursor_adapter: CursorAdapter,
+) -> None:
+    """load() uses the MDC frontmatter description as trigger_context."""
+    skills = cursor_adapter.load(str(CURSOR_FIXTURES))
+    mdc_skill = next(s for s in skills if s.metadata.get("format") == "mdc")
+    assert "TypeScript" in mdc_skill.trigger_context
+
+
+def test_cursor_load_handles_empty_file_without_crashing(
+    cursor_adapter: CursorAdapter, tmp_path: Path
+) -> None:
+    """load() skips empty .cursorrules files and returns an empty list."""
+    (tmp_path / "rules.cursorrules").write_text("")
+    skills = cursor_adapter.load(str(tmp_path))
+    assert skills == []
+
+
+def test_cursor_load_returns_empty_list_for_directory_with_no_cursor_files(
+    cursor_adapter: CursorAdapter, tmp_path: Path
+) -> None:
+    """load() returns an empty list when no .cursorrules or .mdc files exist."""
+    skills = cursor_adapter.load(str(tmp_path))
+    assert skills == []
+
+
+def test_cursor_detect_returns_true_for_directory_with_cursorrules(
+    cursor_adapter: CursorAdapter,
+) -> None:
+    """detect() returns True for the cursor fixtures directory."""
+    assert cursor_adapter.detect(str(CURSOR_FIXTURES)) is True
