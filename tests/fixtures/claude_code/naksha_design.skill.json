@@ -1,0 +1,15 @@
+{
+  "weave_protocol": "1.0",
+  "name": "Naksha Design System",
+  "version": "1.2.0",
+  "platform": "claude_code",
+  "capabilities": ["design", "components", "tokens", "accessibility"],
+  "trigger_patterns": [
+    "design a component",
+    "apply design tokens",
+    "build a layout",
+    "create a design system"
+  ],
+  "author": "Aditya Raj",
+  "dependencies": []
+}

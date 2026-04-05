@@ -26,10 +26,13 @@ def test_windsurf_load_returns_all_skills_from_directory(
 def test_windsurf_load_parses_name_from_file_stem(
     windsurf_adapter: WindsurfAdapter,
 ) -> None:
-    """load() uses the file stem as the Skill name."""
+    """load() uses manifest name when sidecar present, stem otherwise."""
     skills = windsurf_adapter.load(str(WINDSURF_FIXTURES))
     names = {s.name for s in skills}
-    assert "python_standards" in names
+    # python_standards.windsurfrules has a manifest — uses manifest name
+    assert "Python Standards" in names
+    # api_design.windsurfrules has no manifest — uses file stem
+    assert "api_design" in names
 
 
 def test_windsurf_load_parses_first_paragraph_as_trigger_context(
@@ -37,7 +40,7 @@ def test_windsurf_load_parses_first_paragraph_as_trigger_context(
 ) -> None:
     """load() uses the first paragraph of content as trigger_context."""
     skills = windsurf_adapter.load(str(WINDSURF_FIXTURES))
-    python_skill = next(s for s in skills if s.name == "python_standards")
+    python_skill = next(s for s in skills if s.name == "Python Standards")
     assert "Python" in python_skill.trigger_context
 
 
@@ -63,3 +66,19 @@ def test_windsurf_detect_returns_true_for_directory_with_windsurfrules(
 ) -> None:
     """detect() returns True for the windsurf fixtures directory."""
     assert windsurf_adapter.detect(str(WINDSURF_FIXTURES)) is True
+
+
+# ---------------------------------------------------------------------------
+# Manifest (weave.skill.json) tests — WindsurfAdapter
+# ---------------------------------------------------------------------------
+
+def test_windsurf_adapter_applies_manifest(
+    windsurf_adapter: WindsurfAdapter,
+) -> None:
+    """load() applies weave.skill.json manifest to windsurf skills."""
+    skills = windsurf_adapter.load(str(WINDSURF_FIXTURES))
+    manifest_skill = next(
+        (s for s in skills if s.metadata.get("version") == "1.0.0"), None
+    )
+    assert manifest_skill is not None
+    assert manifest_skill.name == "Python Standards"

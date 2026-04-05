@@ -70,10 +70,13 @@ def test_claude_load_returns_all_skills_from_directory(adapter: ClaudeCodeAdapte
 
 
 def test_claude_load_parses_frontmatter_name(adapter: ClaudeCodeAdapter) -> None:
-    """load() correctly reads the name field from YAML frontmatter."""
+    """load() correctly reads the name field from YAML frontmatter or manifest."""
     skills = adapter.load(str(CLAUDE_FIXTURES))
     names = {s.name for s in skills}
+    # backend_api.md has no manifest — falls back to frontmatter name
     assert "Backend API Engineer" in names
+    # naksha_design.md has naksha_design.skill.json manifest — uses manifest name
+    assert "Naksha Design System" in names
 
 
 def test_claude_load_falls_back_to_filename_when_no_frontmatter(
@@ -124,10 +127,10 @@ def test_cursor_load_returns_all_skills_from_directory(
 
 
 def test_cursor_load_parses_cursorrules_name(cursor_adapter: CursorAdapter) -> None:
-    """load() uses the file stem as name for plain .cursorrules files."""
+    """load() uses the manifest name when a weave.skill.json sidecar is present."""
     skills = cursor_adapter.load(str(CURSOR_FIXTURES))
     names = {s.name for s in skills}
-    assert "frontend" in names
+    assert "Cursor Frontend Rules" in names
 
 
 def test_cursor_load_parses_mdc_frontmatter_description(
@@ -161,3 +164,54 @@ def test_cursor_detect_returns_true_for_directory_with_cursorrules(
 ) -> None:
     """detect() returns True for the cursor fixtures directory."""
     assert cursor_adapter.detect(str(CURSOR_FIXTURES)) is True
+
+
+# ---------------------------------------------------------------------------
+# Manifest (weave.skill.json) tests — ClaudeCodeAdapter
+# ---------------------------------------------------------------------------
+
+def test_claude_code_adapter_applies_manifest_name(
+    adapter: ClaudeCodeAdapter,
+) -> None:
+    """load() returns the name from weave.skill.json when a sidecar is present."""
+    skills = adapter.load(str(CLAUDE_FIXTURES))
+    naksha = next((s for s in skills if "naksha" in s.source_path.lower()), None)
+    assert naksha is not None
+    assert naksha.name == "Naksha Design System"
+
+
+def test_claude_code_adapter_manifest_capabilities_override(
+    adapter: ClaudeCodeAdapter,
+) -> None:
+    """Manifest capabilities replace adapter-inferred capabilities."""
+    skills = adapter.load(str(CLAUDE_FIXTURES))
+    naksha = next((s for s in skills if "naksha" in s.source_path.lower()), None)
+    assert naksha is not None
+    assert "tokens" in naksha.capabilities
+    assert "accessibility" in naksha.capabilities
+
+
+def test_claude_code_adapter_manifest_metadata_version(
+    adapter: ClaudeCodeAdapter,
+) -> None:
+    """Manifest version is stored in skill.metadata['version']."""
+    skills = adapter.load(str(CLAUDE_FIXTURES))
+    naksha = next((s for s in skills if "naksha" in s.source_path.lower()), None)
+    assert naksha is not None
+    assert naksha.metadata.get("version") == "1.2.0"
+
+
+# ---------------------------------------------------------------------------
+# Manifest (weave.skill.json) tests — CursorAdapter
+# ---------------------------------------------------------------------------
+
+def test_cursor_adapter_applies_manifest(
+    cursor_adapter: CursorAdapter,
+) -> None:
+    """load() applies weave.skill.json manifest to cursor skills."""
+    skills = cursor_adapter.load(str(CURSOR_FIXTURES))
+    manifest_skill = next(
+        (s for s in skills if s.metadata.get("version") == "2.0.0"), None
+    )
+    assert manifest_skill is not None
+    assert manifest_skill.name == "Cursor Frontend Rules"

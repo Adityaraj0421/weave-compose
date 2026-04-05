@@ -1,0 +1,14 @@
+{
+  "weave_protocol": "1.0",
+  "name": "Cursor Frontend Rules",
+  "version": "2.0.0",
+  "platform": "cursor",
+  "capabilities": ["react", "typescript", "frontend", "components"],
+  "trigger_patterns": [
+    "write frontend code",
+    "create a React component",
+    "apply TypeScript conventions"
+  ],
+  "author": "Weave Contributors",
+  "dependencies": []
+}

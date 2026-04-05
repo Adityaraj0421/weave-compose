@@ -81,9 +81,13 @@ def load(
     for skill in skills:
         registry.register(skill)
 
+    dep_count = sum(len(registry.resolve_dependencies(s)) for s in skills)
+
     registry.save_session(SESSION_FILE)
 
     typer.echo(f"Loaded {len(skills)} skill(s) from {path} (platform: {platform})")
+    if dep_count > 0:
+        typer.echo(f"  Resolved {dep_count} dependency link(s)")
     typer.echo(f"Session saved to {SESSION_FILE}")
     if persist:
         typer.echo("Skills persisted to ChromaDB at ./chroma")

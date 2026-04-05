@@ -57,4 +57,14 @@
 - Load panel: directory path input + platform selector → live registry status breakdown after load
 - 106 tests passing (1 skipped — ChromaDB integration, requires optional dep)
 
+## [v1.0] - 2026-04-05
+
+### Added
+- Weave inter-skill protocol spec (`docs/protocol.md`) — advertisement, request/response wire format, JSON schemas for `WeaveAdvertisement`, `WeaveRequest`, `WeaveResponse`
+- `weave.skill.json` manifest support in all four adapters (Claude Code, Cursor, Codex, Windsurf) — `name`, `version`, `capabilities`, `trigger_patterns`, `author`, `dependencies` override adapter-inferred values
+- Skill-specific manifest lookup (`<stem>.skill.json` preferred over `weave.skill.json`) for directories containing multiple skill files
+- Dependency resolution at skill load time: `SkillRegistry.get_by_name()` and `resolve_dependencies()` — declared dependencies looked up by name, missing deps log a `WARNING`; `weave load` prints resolved link count
+- Conflict detection in `WeaveComposer`: `detect_conflicts()` flags skill pairs with embedding similarity ≥ 0.9 AND opposing keyword pairs (`always/never`, `use/avoid`, `enable/disable`, etc.); `WARNING` logged per conflict, higher-score skill preferred automatically via score-sort
+- 119 tests passing (1 skipped — ChromaDB integration, requires optional dep)
+
 ## [Unreleased]
