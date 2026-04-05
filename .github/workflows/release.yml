@@ -10,6 +10,9 @@ jobs:
   release:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/project/weave-compose/
     permissions:
       id-token: write
       contents: read
@@ -30,5 +33,3 @@ jobs:
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
