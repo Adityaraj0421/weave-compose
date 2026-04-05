@@ -1,8 +1,15 @@
 import { useState } from 'react'
 import SkillBrowser from './components/SkillBrowser'
 import VisualComposer from './components/VisualComposer'
+import LoadPanel from './components/LoadPanel'
 
-type Tab = 'browse' | 'compose'
+type Tab = 'browse' | 'compose' | 'load'
+
+const TAB_LABELS: Record<Tab, string> = {
+  browse: 'Browse Skills',
+  compose: 'Compose',
+  load: 'Load',
+}
 
 export default function App(): React.JSX.Element {
   const [tab, setTab] = useState<Tab>('browse')
@@ -15,7 +22,7 @@ export default function App(): React.JSX.Element {
 
         {/* Tab bar */}
         <div className="flex gap-6 mt-4 border-b border-gray-800">
-          {(['browse', 'compose'] as Tab[]).map((t) => (
+          {(Object.keys(TAB_LABELS) as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => { setTab(t) }}
@@ -25,14 +32,16 @@ export default function App(): React.JSX.Element {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              {t === 'browse' ? 'Browse Skills' : 'Compose'}
+              {TAB_LABELS[t]}
             </button>
           ))}
         </div>
       </header>
 
       <main>
-        {tab === 'browse' ? <SkillBrowser /> : <VisualComposer />}
+        {tab === 'browse' && <SkillBrowser />}
+        {tab === 'compose' && <VisualComposer />}
+        {tab === 'load' && <LoadPanel />}
       </main>
     </div>
   )
