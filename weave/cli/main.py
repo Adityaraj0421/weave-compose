@@ -6,6 +6,7 @@ from pathlib import Path
 
 import typer
 
+from weave.cli.run_command import run as _run_command
 from weave.core.adapters.base import BaseAdapter
 from weave.core.adapters.claude_code import ClaudeCodeAdapter
 from weave.core.registry import SkillRegistry
@@ -193,3 +194,6 @@ def clear() -> None:
     registry.clear()
     Path(SESSION_FILE).unlink(missing_ok=True)
     typer.echo("Registry cleared.")
+
+
+app.command(name="run")(_run_command)
