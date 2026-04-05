@@ -4,13 +4,14 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 jobs:
   release:
     name: Build and publish to PyPI
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # required for OIDC trusted publishing
+      id-token: write
       contents: read
 
     steps:
@@ -37,5 +38,4 @@ jobs:
         if: ${{ secrets.PYPI_API_TOKEN == '' }}
         run: |
           echo "PYPI_API_TOKEN secret not set — skipping publish."
-          echo "To publish to PyPI, add a PYPI_API_TOKEN secret in:"
-          echo "  Settings → Secrets and variables → Actions → New repository secret"
+          echo "To publish, add a PYPI_API_TOKEN secret in repo Settings."
