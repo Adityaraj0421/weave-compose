@@ -1,2 +1,58 @@
 # weave.yaml.example
-# Coming soon. See Wave 2.2, Chunk 2.2.3.
+#
+# Copy this file to your project root as weave.yaml and edit to match your setup.
+# Run `weave run` to start the interactive query loop using this config.
+# Run `weave run --config path/to/weave.yaml` to use a config at a custom path.
+
+# Schema version. Always "1" for now.
+version: "1"
+
+# skills: lists every skill directory Weave should load.
+# Each entry needs a path and a platform. Add as many entries as you need.
+skills:
+  - path: ./naksha-studio           # relative or absolute path to the skill directory
+    platform: claude_code           # supported: claude_code | cursor | codex | windsurf
+
+  - path: ./backend-pack
+    platform: codex                 # reads AGENTS.md and .codex/*.md files
+
+  # Cross-platform example — mix and match freely:
+  # - path: ./frontend-rules
+  #   platform: cursor              # reads .cursorrules and .cursor/rules/*.mdc files
+
+  # - path: ./infra-rules
+  #   platform: windsurf            # reads .windsurfrules files
+
+# composition: controls how Weave selects and merges skills.
+# All fields are optional — defaults shown below are used if the block is omitted.
+composition:
+  # strategy controls which skills are activated for each query:
+  #   dynamic      — select the best skill(s) automatically by semantic similarity (default)
+  #   always-merge — inject all loaded skills on every query regardless of relevance
+  #   manual       — user specifies which skill names to activate; no auto-selection
+  strategy: dynamic
+
+  # max_active_skills: hard cap on how many skills are returned per query.
+  # Keeps composed context from growing too large. Recommended: 2.
+  max_active_skills: 2
+
+  # confidence_threshold: when top_n=1, if the score gap between rank-1 and rank-2
+  # is less than this value, both skills are returned for composition.
+  # Lower = more aggressive dual-skill selection. Default: 0.1
+  confidence_threshold: 0.1
+
+  # model: the sentence-transformers model used to embed queries and skills.
+  # Runs entirely locally — no API key required.
+  # Downloaded once to ~/.cache/huggingface/hub/ (~80MB), cached after first use.
+  model: all-MiniLM-L6-v2
+
+# output: controls verbosity of CLI commands.
+# All fields are optional — both default to false.
+output:
+  # verbose: if true, `weave load` and `weave run` print each skill name
+  # and its capability count as skills are loaded.
+  verbose: false
+
+  # explain: if true, `weave query` and `weave run` print a similarity score
+  # table showing every loaded skill's score for the query.
+  explain: false
